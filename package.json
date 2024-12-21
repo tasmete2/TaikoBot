@@ -25,11 +25,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xFess/TaikoBot.git"
+    "url": "git+https://github.com/TastasMete/TaikoBot.git"
   },
   "bugs": {
-    "url": "https://github.com/0xFess/TaikoBot/issues"
+    "url": "https://github.com/TastasMete/TaikoBot/issues"
   },
-  "homepage": "https://github.com/0xFess/TaikoBot#readme",
+  "homepage": "https://github.com/TastasMete/TaikoBot#readme",
   "devDependencies": {}
 }
