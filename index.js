@@ -1,20 +1,14 @@
 require('dotenv').config();
 const { getWeb3, walletAddress, switchRpc } = require('./config/web3');
-const { lendAmount } = require('./src/module/minterest/lend');
-const { redeem } = require('./src/module/minterest/redeem');
 const { wrap } = require('./src/module/wrap/wrap');
 const { unwrap } = require('./src/module/wrap/unwrap');
 const BN = require('bn.js');
 
 function randomGasPrice(web3Instance) {
-    const minGwei = new BN(web3Instance.utils.toWei('0.05', 'gwei'));
-    const maxGwei = new BN(web3Instance.utils.toWei('0.054', 'gwei'));
+    const minGwei = new BN(web3Instance.utils.toWei('0.11', 'gwei'));
+    const maxGwei = new BN(web3Instance.utils.toWei('0.15', 'gwei'));
     const randomGwei = minGwei.add(new BN(Math.floor(Math.random() * (maxGwei.sub(minGwei).toNumber()))));
     return randomGwei;
-}
-
-function randomIterations() {
-    return Math.random() < 0.5 ? 7 : 8; 
 }
 
 async function getNonce(web3Instance) {
@@ -51,11 +45,18 @@ async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
     }
 }
 
+function getRandomDelay(totalIterations, totalDurationHours) {
+    const totalDurationMs = totalDurationHours * 60 * 60 * 1000;
+    const averageDelayMs = totalDurationMs / totalIterations;
+    const minDelayMs = averageDelayMs * 0.5;
+    const maxDelayMs = averageDelayMs * 1.5;
+    return Math.floor(Math.random() * (maxDelayMs - minDelayMs + 1)) + minDelayMs;
+}
+
 async function main() {
     let web3Instance = getWeb3();
-    const lendRangeMin = 1.0;
-    const lendRangeMax = 2.0;
-    const maxIterations = randomIterations();
+    const maxIterations = 50;
+    const totalDurationHours = 5;
     let iterationCount = 0;
 
     while (iterationCount < maxIterations) {
@@ -75,43 +76,30 @@ async function main() {
             break;
         }
 
-        // Lend
-        let amount = Math.random() * (lendRangeMax - lendRangeMin) + lendRangeMin;
-        amount = Math.floor(amount * 1_000_000);
-        let txHash = await executeTransaction(lendAmount, gasPriceWei, localNonce, amount);
+        // ETH to WETH (Wrap)
+        const amountToWrap = balance.muln(90).divn(100); // %90 of the balance
+        localNonce = await getNonce(web3Instance);
+        let txHash = await executeTransaction(wrap, gasPriceWei, localNonce, web3Instance.utils.fromWei(amountToWrap, 'ether'));
         if (!txHash) break;
         localNonce++;
         let txLink = `https://taikoscan.io/tx/${txHash}`;
-        let amountDecimal = amount / 1_000_000;
-        console.log(`Lend Transaction sent: ${txLink}, \nAmount: ${amountDecimal} USDC \nGwei: ${web3Instance.utils.fromWei(gasPriceWei, 'gwei')} Gwei`);
+        console.log(`Wrap Transaction sent: ${txLink}, \nAmount: ${web3Instance.utils.fromWei(amountToWrap, 'ether')} ETH`);
 
-        // Redeem
+        // WETH to ETH (Unwrap)
+        const wethBalanceWei = await web3Instance.eth.getBalance(walletAddress); // Assume same wallet holds WETH
         localNonce = await getNonce(web3Instance);
-        txHash = await executeTransaction(redeem, gasPriceWei, localNonce);
-        if (!txHash) break;
-        localNonce++;
-        
-        // Wrap
-        const wrapAmountMin = 0.0003;
-        const wrapAmountMax = 0.0004;
-        let wrapAmount = Math.random() * (wrapAmountMax - wrapAmountMin) + wrapAmountMin;
-        wrapAmount = parseFloat(wrapAmount.toFixed(6));
-        localNonce = await getNonce(web3Instance);
-        txHash = await executeTransaction(wrap, gasPriceWei, localNonce, wrapAmount);
+        txHash = await executeTransaction(unwrap, gasPriceWei, localNonce, web3Instance.utils.fromWei(wethBalanceWei, 'ether'));
         if (!txHash) break;
         localNonce++;
         txLink = `https://taikoscan.io/tx/${txHash}`;
-        console.log(`Wrap Transaction sent: ${txLink}, \nAmount: ${wrapAmount} ETH`);
-
-        // Unwrap
-        localNonce = await getNonce(web3Instance);
-        txHash = await executeTransaction(unwrap, gasPriceWei, localNonce, wrapAmount);
-        if (!txHash) break;
-        localNonce++;
-        txLink = `https://taikoscan.io/tx/${txHash}`;
-        console.log(`Unwrap Transaction sent: ${txLink}, \nAmount: ${wrapAmount} ETH`);
+        console.log(`Unwrap Transaction sent: ${txLink}, \nAmount: ${web3Instance.utils.fromWei(wethBalanceWei, 'ether')} WETH`);
 
         iterationCount++;
+
+        // Rastgele bekleme süresi (5 saat içinde)
+        const delay = getRandomDelay(maxIterations, totalDurationHours);
+        console.log(`Waiting for ${delay / 1000 / 60} minutes before next iteration...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     console.log(`Completed ${maxIterations} iterations. Exiting loop.`);
