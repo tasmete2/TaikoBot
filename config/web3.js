@@ -2,7 +2,7 @@ require('dotenv').config();
 const Web3 = require('web3');
 
 const rpcUrls = [
-    'wss://taiko-hekla.drpc.org',
+    'https://taiko-hekla.drpc.org',
     'https://rpc.hekla.taiko.xyz',
     'https://taiko-hekla-rpc.publicnode.com',
     'https://rpc.ankr.com/taiko_hekla',
