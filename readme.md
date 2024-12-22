@@ -60,7 +60,7 @@ This BOT automates various tasks. Below is a detailed breakdown of the features 
 
     
     ```sh
-    echo "PRIVATE_KEY=your_private_key_here" >> .env
+    echo "PRIVATE_KEY=your_private_key_here" > .env
     ```
 
 ## Running the Bot
