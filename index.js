@@ -3,7 +3,9 @@ const { getWeb3, walletAddress, switchRpc } = require('./config/web3');
 const { wrap } = require('./src/module/wrap/wrap');
 const { unwrap } = require('./src/module/wrap/unwrap');
 const BN = require('bn.js');
+const Web3 = require('web3');
 
+// Rastgele gaz fiyatı hesaplama fonksiyonu
 function randomGasPrice(web3Instance) {
     const minGwei = new BN(web3Instance.utils.toWei('0.11', 'gwei'));
     const maxGwei = new BN(web3Instance.utils.toWei('0.15', 'gwei'));
@@ -11,10 +13,12 @@ function randomGasPrice(web3Instance) {
     return randomGwei;
 }
 
+// Nonce alma fonksiyonu
 async function getNonce(web3Instance) {
     return await web3Instance.eth.getTransactionCount(walletAddress, 'pending');
 }
 
+// İşlem yürütme fonksiyonu
 async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
     let web3Instance = getWeb3();
     while (true) {
@@ -45,19 +49,39 @@ async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
     }
 }
 
+// WETH bakiyesini alma fonksiyonu
+async function getWethBalance(web3Instance, wethContractAddress, walletAddress) {
+    const wethChecksumAddress = Web3.utils.toChecksumAddress(wethContractAddress);
+    const wethContract = new web3Instance.eth.Contract([
+        // WETH contract ABI (minimal version, only balanceOf method)
+        {
+            "constant": true,
+            "inputs": [{ "name": "_owner", "type": "address" }],
+            "name": "balanceOf",
+            "outputs": [{ "name": "balance", "type": "uint256" }],
+            "type": "function"
+        }
+    ], wethChecksumAddress);
+
+    const balance = await wethContract.methods.balanceOf(walletAddress).call();
+    return new BN(balance);
+}
+
+// Rastgele gecikme süresi hesaplama fonksiyonu
 function getRandomDelay(totalIterations, totalDurationHours) {
-    const totalDurationMs = totalDurationHours * 60 * 60 * 1000;
-    const averageDelayMs = totalDurationMs / totalIterations;
-    const minDelayMs = averageDelayMs * 0.5;
-    const maxDelayMs = averageDelayMs * 1.5;
-    return Math.floor(Math.random() * (maxDelayMs - minDelayMs + 1)) + minDelayMs;
+    const totalDurationMs = totalDurationHours * 60 * 60 * 1000; // Toplam süreyi milisaniyeye çevir
+    const averageDelayMs = totalDurationMs / totalIterations; // Ortalama gecikme süresi
+    const minDelayMs = averageDelayMs * 0.5; // Minimum gecikme süresi
+    const maxDelayMs = averageDelayMs * 1.5; // Maksimum gecikme süresi
+    return Math.floor(Math.random() * (maxDelayMs - minDelayMs + 1)) + minDelayMs; // Rastgele gecikme süresi
 }
 
 async function main() {
     let web3Instance = getWeb3();
     const maxIterations = 50;
-    const totalDurationHours = 5;
+    const totalDurationHours = 5; // Toplam süre: 5 saat
     let iterationCount = 0;
+    const wethContractAddress = '0xA51894664A773981C6C112C43ce576f315d5b1B6'; // Taiko ağı için doğru WETH contract adresi
 
     while (iterationCount < maxIterations) {
         const gasPriceWei = randomGasPrice(web3Instance);
@@ -86,17 +110,21 @@ async function main() {
         console.log(`Wrap Transaction sent: ${txLink}, \nAmount: ${web3Instance.utils.fromWei(amountToWrap, 'ether')} ETH`);
 
         // WETH to ETH (Unwrap)
-        const wethBalanceWei = await web3Instance.eth.getBalance(walletAddress); // Assume same wallet holds WETH
+        const wethBalance = await getWethBalance(web3Instance, wethContractAddress, walletAddress);
+        if (wethBalance.isZero()) {
+            console.log("No WETH balance to unwrap. Skipping unwrap transaction.");
+            break;
+        }
         localNonce = await getNonce(web3Instance);
-        txHash = await executeTransaction(unwrap, gasPriceWei, localNonce, web3Instance.utils.fromWei(wethBalanceWei, 'ether'));
+        txHash = await executeTransaction(unwrap, gasPriceWei, localNonce, web3Instance.utils.fromWei(wethBalance, 'ether'));
         if (!txHash) break;
         localNonce++;
         txLink = `https://taikoscan.io/tx/${txHash}`;
-        console.log(`Unwrap Transaction sent: ${txLink}, \nAmount: ${web3Instance.utils.fromWei(wethBalanceWei, 'ether')} WETH`);
+        console.log(`Unwrap Transaction sent: ${txLink}, \nAmount: ${web3Instance.utils.fromWei(wethBalance, 'ether')} WETH`);
 
         iterationCount++;
 
-        // Rastgele bekleme süresi (5 saat içinde)
+        // Rastgele gecikme süresi
         const delay = getRandomDelay(maxIterations, totalDurationHours);
         console.log(`Waiting for ${delay / 1000 / 60} minutes before next iteration...`);
         await new Promise(resolve => setTimeout(resolve, delay));
