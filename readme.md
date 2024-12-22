@@ -74,7 +74,7 @@ npm run start
 ```
 ### Scheduled Run
 
-To set up the bot to run every day at 1:30 AM UTC, follow these steps:
+To set up the bot to run every day at 08.30 AM UTC, follow these steps:
 
 1.	Make the setup-cron.sh script executable:
  ```sh
@@ -91,5 +91,4 @@ Feel free to fork and contribute adding more feature thanks.
 ## SUPPORT
 Each tx contain tiny amount of tax to support next Bot with various features
 
-## Have Question?
-Join [Here](https://t.me/TaikoTxSupport)
+
