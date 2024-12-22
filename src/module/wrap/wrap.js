@@ -31,7 +31,7 @@ async function wrap(amount, gasPrice) {
     const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
     const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    return receipt.transactionHash;
+    return receipt.transactionHash; // Vergi ödemesi çıkarıldı
 }
 
 module.exports = {
