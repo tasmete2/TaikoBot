@@ -2,11 +2,11 @@ require('dotenv').config();
 const Web3 = require('web3');
 
 const rpcUrls = [
-    'https://rpc.taiko.xyz',
-    'https://rpc.mainnet.taiko.xyz',
-    'https://rpc.ankr.com/taiko',
-    'https://rpc.taiko.tools',
-    'https://taiko.blockpi.network/v1/rpc/public'
+    'wss://taiko-hekla.drpc.org',
+    'https://rpc.hekla.taiko.xyz',
+    'https://taiko-hekla-rpc.publicnode.com',
+    'https://rpc.ankr.com/taiko_hekla',
+    'https://hekla.taiko.tools'
 ];
 
 let currentRpcIndex = 0;
