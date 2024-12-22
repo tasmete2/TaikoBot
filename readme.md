@@ -1,25 +1,17 @@
 # Taiko Transaction Bot
 
-This Taiko transaction bot is a daily routine bot, its job is to complete transactions within the range of 136 to 144 transactions, with each transaction having a randomized interval between 50 seconds to 330 seconds.
+Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wrap ve 50 tane unwrap işlemi yapar ve bu işlemleri 5 saatlik rastgele bir zamanda yapar.
 
 ## Prerequisite
 
 To run this bot you need to:
 
-- Taiko Mainnet Account with > 2 USDC AND > 0.05 ETH Balance.
 - Node.js Installed.
 
 ## BOT Feature Overview
 
 This BOT automates various tasks. Below is a detailed breakdown of the features and the sequence of operations it performs.
 
-### Bot Feature
-
-- Lends a random amount between 1 USDC to 2 USDC into the minterest Dapp.
-- Withdraws all USDC from the minterest Dapp.
-- Wraps a random amount between 0.0003 ETH to 0.0005 ETH to WETH.
-- Unwraps all WETH back to ETH.
-- This bot will repeat all transactions until it reaches the daily max point.
 
 ## Set Up
 
