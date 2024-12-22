@@ -16,13 +16,10 @@ if [ ! -f "$PROJECT_PATH/index.js" ]; then
   exit 1
 fi
 
-# Cron job'u tanımlama - Sabit zaman olarak 23:15
-CRON_JOB="15 23 * * * $NODE_PATH $PROJECT_PATH/index.js"
-
-# Önceki cron job'u kaldırma
-(crontab -l | grep -v "$NODE_PATH $PROJECT_PATH/index.js") | crontab -
+# Cron job'u tanımlama - Sabit zaman olarak 08:30
+CRON_JOB="30 08 * * * $NODE_PATH $PROJECT_PATH/index.js"
 
 # Yeni cron job'u ekleme
 (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
 
-echo "Cron job added successfully. The bot will run every day at 23:15 UTC."
+echo "Cron job added successfully. The bot will run every day at 08:30 UTC."
