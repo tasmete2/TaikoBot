@@ -16,10 +16,22 @@ if [ ! -f "$PROJECT_PATH/index.js" ]; then
   exit 1
 fi
 
-# Cron job'u tanımlama - Sabit zaman olarak 08:30
-CRON_JOB="30 08 * * * $NODE_PATH $PROJECT_PATH/index.js"
+# Rastgele bir saat ve dakika oluşturma (08:30 ile 12:00 arasında)
+RANDOM_HOUR=$((8 + RANDOM % 3))
+RANDOM_MINUTE=$((RANDOM % 60))
 
-# Yeni cron job'u ekleme
-(crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+# Cron job'u tanımlama - Rastgele zaman
+CRON_JOB="$RANDOM_MINUTE $RANDOM_HOUR * * * $NODE_PATH $PROJECT_PATH/index.js"
 
-echo "Cron job added successfully. The bot will run every day at 08:30 UTC."
+# Yeni cron job'u ekleme (mevcut cron job'ları temizleyerek)
+(crontab -l 2>/dev/null | grep -v "$NODE_PATH $PROJECT_PATH/index.js"; echo "$CRON_JOB") | crontab -
+
+echo "Cron job added successfully. The bot will run tomorrow at $RANDOM_HOUR:$RANDOM_MINUTE."
+
+# Gelecek cron job'ları sadece 18 Mart 2025'e kadar çalıştırma
+END_DATE="2025-03-18"
+CURRENT_DATE=$(date +%Y-%m-%d)
+if [[ "$CURRENT_DATE" > "$END_DATE" ]]; then
+  (crontab -l 2>/dev/null | grep -v "$NODE_PATH $PROJECT_PATH/index.js") | crontab -
+  echo "Script has reached its end date. Cron job removed."
+fi
