@@ -8,10 +8,6 @@ To run this bot you need to:
 
 - Node.js Installed.
 
-## BOT Feature Overview
-
-This BOT automates various tasks. Below is a detailed breakdown of the features and the sequence of operations it performs.
-
 
 ## Set Up
 
