@@ -74,6 +74,12 @@ chmod +x setup-cron.sh
 ```sh
 ./setup-cron.sh
 ```
+3. Gece 00:00 cron jop çalıştırma
+ ```sh
+crontab -e
+0 0 * * * /bin/bash /path/to/your/setup-cron.sh
+```
+
 ## CONTRIBUTE
 
 Feel free to fork and contribute adding more feature thanks.
