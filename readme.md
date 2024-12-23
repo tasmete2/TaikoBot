@@ -2,12 +2,6 @@
 
 Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wrap ve 50 tane unwrap işlemi yapar ve bu işlemleri 5 saatlik rastgele bir zamanda yapar.
 
-## Prerequisite
-
-To run this bot you need to:
-
-- Node.js Installed.
-
 
 ## Set Up
 
