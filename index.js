@@ -99,27 +99,14 @@ async function waitForEthBalance(web3Instance, walletAddress, requiredBalance, t
     throw new Error("Required ETH balance did not appear within the timeout period.");
 }
 
-// Rastgele bir bekleme süresi oluşturma (0 ile max ms arasında)
-function getRandomWaitTime(maxMilliseconds) {
-    return Math.floor(Math.random() * maxMilliseconds);
-}
-
 async function main() {
     let web3Instance = getWeb3();
     const maxIterations = 50;
-    const totalDurationMilliseconds = 5 * 60 * 60 * 1000; // 5 saat toplam süre
-    const maxWaitTimePerIteration = totalDurationMilliseconds / maxIterations;
-    let completedIterations = 0;
-    let completedSwaps = 0;
+    let completedIterations = 0; // Tamamlanan iterasyon sayısı
+    let completedSwaps = 0; // Tamamlanan swap sayısı
     const wethContractAddress = '0xA51894664A773981C6C112C43ce576f315d5b1B6'; // Taiko ağı için doğru WETH contract adresi
 
     while (completedIterations < maxIterations) {
-        const waitTime = getRandomWaitTime(maxWaitTimePerIteration);
-        console.log(`Waiting for ${waitTime / 1000} seconds before next iteration.`);
-        
-        // Belirlenen zamana kadar bekleyin
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        
         const gasPriceWei = randomGasPrice(web3Instance);
         let localNonce = await getNonce(web3Instance);
 
