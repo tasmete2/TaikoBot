@@ -79,7 +79,7 @@ chmod +x setup-cron.sh
 crontab -e
 ```
 ```sh
-0 0 * * * /bin/bash /path/to/your/setup-cron.sh
+0 0 * * * /bin/bash /home/user/TaikoBot/setup-cron.sh
 ```
 
 ## CONTRIBUTE
